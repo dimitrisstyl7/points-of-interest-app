@@ -1,4 +1,4 @@
-package dstyl.pointsofinterest.data.local
+package dstyl.pointsofinterest.data
 
 import androidx.room.Dao
 import androidx.room.Delete

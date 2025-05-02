@@ -1,4 +1,4 @@
-package dstyl.pointsofinterest.data.local
+package dstyl.pointsofinterest.data
 
 class PointOfInterestRepository(private val pointOfInterestDao: PointOfInterestDao) {
 

@@ -1,4 +1,4 @@
-package dstyl.pointsofinterest.data.local
+package dstyl.pointsofinterest.data
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
