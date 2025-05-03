@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "dstyl.pointsofinterest"
+    namespace = "dimstyl.pointsofinterest"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "dstyl.pointsofinterest"
+        applicationId = "dimstyl.pointsofinterest"
         minSdk = 30
         targetSdk = 35
         versionCode = 1
