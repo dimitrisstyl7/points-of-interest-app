@@ -1,0 +1,8 @@
+package dimstyl.pointsofinterest.ui.screens.main
+
+import dimstyl.pointsofinterest.ui.navigation.NavItem
+import dimstyl.pointsofinterest.ui.navigation.navItems
+
+data class MainState(
+    val currentNavItem: NavItem = navItems[0] // Places screen is the starting destination
+)
