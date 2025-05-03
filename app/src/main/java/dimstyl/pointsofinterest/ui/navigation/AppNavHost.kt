@@ -5,6 +5,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import dimstyl.pointsofinterest.ui.screens.favourites.FavouritesScreen
+import dimstyl.pointsofinterest.ui.screens.places.PlacesScreen
 
 @Composable
 fun AppNavHost(
@@ -16,9 +18,11 @@ fun AppNavHost(
         startDestination = Places
     ) {
         composable<Places> {
+            PlacesScreen()
         }
 
         composable<Favourites> {
+            FavouritesScreen()
         }
     }
 
