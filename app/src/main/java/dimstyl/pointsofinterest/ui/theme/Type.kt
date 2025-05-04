@@ -1,4 +1,4 @@
-package dstyl.pointsofinterest.ui.theme
+package dimstyl.pointsofinterest.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -3,14 +3,15 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
-    namespace = "dstyl.pointsofinterest"
+    namespace = "dimstyl.pointsofinterest"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "dstyl.pointsofinterest"
+        applicationId = "dimstyl.pointsofinterest"
         minSdk = 30
         targetSdk = 35
         versionCode = 1
@@ -51,6 +52,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.room.runtime)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.navigation.compose)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

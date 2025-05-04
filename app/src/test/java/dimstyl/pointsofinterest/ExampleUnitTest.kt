@@ -1,4 +1,4 @@
-package dstyl.pointsofinterest
+package dimstyl.pointsofinterest
 
 import org.junit.Test
 
