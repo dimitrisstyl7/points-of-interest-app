@@ -2,6 +2,7 @@ package dimstyl.pointsofinterest.ui.screens.main
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -51,8 +52,11 @@ fun MainScreen(
     navController: NavController = rememberNavController(),
     viewModel: MainViewModel = viewModel<MainViewModel>(factory = viewModelFactory { MainViewModel() }), // TODO: if not arguments, just use viewModel()
     openAppSettings: () -> Unit,
+    showToastMessage: (String, Int) -> Unit,
     isPermanentlyDeclined: (String) -> Boolean,
-    exitApp: () -> Unit
+    exitApp: () -> Unit,
+    createTempImageUri: () -> Uri,
+    copyTempImageToPermanent: (Uri) -> Uri
 ) {
     val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -127,16 +131,21 @@ fun MainScreen(
                     .padding(bottom = 20.dp, end = 20.dp),
                 onClick = { viewModel.showNewPlaceDialog(true) }
             )
-
-            if (state.showNewPlaceDialog) {
-                NewPlaceDialog(
-                    viewModel = viewModel,
-                    state = state,
-                    onSnackbarShow = { message, shortDuration ->
-                        onSnackbarShow(message, shortDuration)
-                    })
-            }
         }
+    }
+
+    // NewPlaceDialog
+    if (state.showNewPlaceDialog) {
+        NewPlaceDialog(
+            viewModel = viewModel,
+            state = state,
+            showSnackbar = { message, shortDuration ->
+                onSnackbarShow(message, shortDuration)
+            },
+            showToast = showToastMessage,
+            createTempImageUri = createTempImageUri,
+            copyTempImageToPermanent = copyTempImageToPermanent
+        )
     }
 
     // Show RequestPermissionRationaleDialog if necessary

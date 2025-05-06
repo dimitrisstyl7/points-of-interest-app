@@ -9,6 +9,6 @@ data class PointOfInterestUiModel(
     val rating: String = "", // min value: 1, max value: 5
     val minRating: Int = 1,
     val maxRating: Int = 5,
-    val photo: String = "",
+    val photoUri: String = "",
     val isFavorite: Boolean = false,
 )

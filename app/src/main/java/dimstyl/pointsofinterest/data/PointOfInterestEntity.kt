@@ -13,6 +13,6 @@ data class PointOfInterestEntity(
     @ColumnInfo val longitude: Double,
     @ColumnInfo val latitude: Double,
     @ColumnInfo val rating: Int,
-    @ColumnInfo val photo: String? = null,
+    @ColumnInfo val photoUri: String? = null,
     @ColumnInfo val isFavorite: Boolean,
 )
