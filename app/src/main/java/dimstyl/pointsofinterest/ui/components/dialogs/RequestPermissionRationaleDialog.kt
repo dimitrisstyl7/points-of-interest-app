@@ -54,3 +54,14 @@ class CameraPermissionTextProvider : PermissionTextProvider {
         }
     }
 }
+
+class LocationPermissionTextProvider : PermissionTextProvider {
+    override fun getDescription(isPermanentlyDeclined: Boolean): String {
+        return if (isPermanentlyDeclined) {
+            "Location access has been permanently denied. Please enable location " +
+                    "in app settings to save your Point of Interest."
+        } else {
+            "This app needs your location to save your Point of Interest accurately."
+        }
+    }
+}

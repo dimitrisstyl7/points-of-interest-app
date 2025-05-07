@@ -7,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import dimstyl.pointsofinterest.ui.theme.DialogTextFieldFocusedBorderColor
 import dimstyl.pointsofinterest.ui.theme.DialogTextFieldFocusedLabelColor
@@ -24,6 +25,7 @@ fun OutlinedTextField(
     singleLine: Boolean = true,
     isError: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions(
+        capitalization = KeyboardCapitalization.Sentences,
         keyboardType = KeyboardType.Text,
         imeAction = ImeAction.Next
     ),

@@ -7,5 +7,6 @@ data class MainState(
     val currentNavItem: NavItem = navItems[0], // Places screen is the starting destination
     val pointOfInterestUiModel: PointOfInterestUiModel = PointOfInterestUiModel(),
     val showNewPlaceDialog: Boolean = false,
-    val permissions: List<String> = listOf()
+    val permissions: List<String> = listOf(),
+    val savingPointOfInterest: Boolean = false
 )

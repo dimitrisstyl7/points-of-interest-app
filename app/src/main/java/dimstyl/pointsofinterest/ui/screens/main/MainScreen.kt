@@ -25,10 +25,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import dimstyl.pointsofinterest.App
 import dimstyl.pointsofinterest.ui.components.BottomBar
 import dimstyl.pointsofinterest.ui.components.FloatingActionButton
 import dimstyl.pointsofinterest.ui.components.TopBar
 import dimstyl.pointsofinterest.ui.components.dialogs.CameraPermissionTextProvider
+import dimstyl.pointsofinterest.ui.components.dialogs.LocationPermissionTextProvider
 import dimstyl.pointsofinterest.ui.components.dialogs.NewPlaceDialog
 import dimstyl.pointsofinterest.ui.components.dialogs.RequestPermissionRationaleDialog
 import dimstyl.pointsofinterest.ui.navigation.AppNavHost
@@ -50,7 +52,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     navController: NavController = rememberNavController(),
-    viewModel: MainViewModel = viewModel<MainViewModel>(factory = viewModelFactory { MainViewModel() }), // TODO: if not arguments, just use viewModel()
+    viewModel: MainViewModel = viewModel<MainViewModel>(factory = viewModelFactory {
+        MainViewModel(App.appModule.pointOfInterestRepository)
+    }),
     openAppSettings: () -> Unit,
     showToast: (String, Int) -> Unit,
     isPermanentlyDeclined: (String) -> Boolean,
@@ -153,6 +157,8 @@ fun MainScreen(
         RequestPermissionRationaleDialog(
             permissionTextProvider = when (permission) {
                 Manifest.permission.CAMERA -> CameraPermissionTextProvider()
+                Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION -> LocationPermissionTextProvider()
+
                 else -> return@forEach
             },
             isPermanentlyDeclined = isPermanentlyDeclined(permission),

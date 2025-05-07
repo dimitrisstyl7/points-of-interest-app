@@ -50,6 +50,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import dimstyl.pointsofinterest.R
+import dimstyl.pointsofinterest.ui.components.ButtonCircularProgressIndicator
 import dimstyl.pointsofinterest.ui.components.OutlinedTextField
 import dimstyl.pointsofinterest.ui.screens.main.LazyColumnType
 import dimstyl.pointsofinterest.ui.screens.main.MainState
@@ -74,6 +75,8 @@ fun NewPlaceDialog(
     createTempPhotoUri: () -> Uri,
     copyTempPhotoToPermanent: (Uri) -> Uri
 ) {
+    val context = LocalContext.current
+
     var photoUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var photoInPreview by rememberSaveable { mutableStateOf(false) }
     var photoCaptured by rememberSaveable { mutableStateOf(false) }
@@ -113,6 +116,19 @@ fun NewPlaceDialog(
                 showToast(
                     "Only one photo allowed. Delete the current one to add a new photo.",
                     Toast.LENGTH_LONG
+                )
+            }
+        }
+    )
+
+    // Multiple location permission launcher
+    val multipleLocationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            permissions.keys.forEach { permission ->
+                viewModel.onPermissionResult(
+                    permission = permission,
+                    isGranted = permissions[permission] == true
                 )
             }
         }
@@ -326,40 +342,32 @@ fun NewPlaceDialog(
             viewModel.showNewPlaceDialog(false)
         },
         confirmButton = {
-            TextButton(
-                onClick = {
-                    if (viewModel.validatePointOfInterestUiModel()) {
-                        // Use a toast instead of a snackbar to ensure the message appears
-                        // above the dialog and is immediately visible to the user.
-                        showToast("Please fill in all required fields", Toast.LENGTH_LONG)
-                    } else {
-                        // Copy photo from cache to permanent storage
-                        val uri = state.pointOfInterestUiModel.photoUri?.toUri() ?: Uri.EMPTY
-                        val newUri = when {
-                            uri.equals(Uri.EMPTY) -> ""
-                            else -> copyTempImageToPermanent(uri).toString()
-                        }
-
-                        // Check if the copy was successful
-                        if (newUri.isBlank()) {
-                            showToast("Failed to save your photo", Toast.LENGTH_SHORT)
-                            return@TextButton
-                        }
-
-                        // Save point of interest to database
-                        val pointOfInterest = state.pointOfInterestUiModel.copy(photoUri = newUri)
-                        viewModel.setNewPointOfInterestUiModel(pointOfInterest)
-                        viewModel.savePointOfInterest()
-                        viewModel.showNewPlaceDialog(false)
-
-                        showSnackbar(
-                            "\"${pointOfInterest.title}\" has been added to your places",
-                            true
+            if (state.savingPointOfInterest) {
+                ButtonCircularProgressIndicator()
+            } else {
+                TextButton(
+                    onClick = {
+                        viewModel.submitNewPointOfInterest(
+                            context = context,
+                            photoUri = photoUri,
+                            copyTempPhotoToPermanent = copyTempPhotoToPermanent,
+                            requestPermission = {
+                                multipleLocationPermissionLauncher.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                                        Manifest.permission.ACCESS_FINE_LOCATION
+                                    )
+                                )
+                            },
+                            showToast = { message, duration -> showToast(message, duration) },
+                            // @formatter:off
+                            showSnackbar = { message, shortDuration -> showSnackbar(message, shortDuration) }
+                            // @formatter:on
                         )
-                    }
-                },
-                colors = ButtonDefaults.textButtonColors(contentColor = DialogConfirmButtonTextColor)
-            ) { Text(text = "Add") }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = DialogConfirmButtonTextColor)
+                ) { Text(text = "Add") }
+            }
         },
         dismissButton = {
             TextButton(

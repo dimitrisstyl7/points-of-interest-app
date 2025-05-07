@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class PointOfInterestEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int,
+    @PrimaryKey(autoGenerate = true) val id: Int? = null,
     @ColumnInfo val title: String,
     @ColumnInfo val category: String,
     @ColumnInfo val description: String? = null,
