@@ -2,7 +2,6 @@ package dimstyl.pointsofinterest.ui.screens.main
 
 import androidx.lifecycle.ViewModel
 import dimstyl.pointsofinterest.ui.navigation.NavItem
-import dimstyl.pointsofinterest.ui.screens.main.PointOfInterestUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -53,6 +52,10 @@ class MainViewModel : ViewModel() {
         val ratingError = rating.isBlank() || rating.toInt() !in min..max
 
         return titleError || categoryError || ratingError
+    }
+
+    fun savePointOfInterest() {
+        // TODO
     }
 
 }

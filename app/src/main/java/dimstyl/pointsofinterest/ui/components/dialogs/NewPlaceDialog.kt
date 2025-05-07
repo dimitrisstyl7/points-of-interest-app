@@ -6,10 +6,14 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -26,18 +30,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import dimstyl.pointsofinterest.R
 import dimstyl.pointsofinterest.ui.components.OutlinedTextField
 import dimstyl.pointsofinterest.ui.screens.main.LazyColumnType
@@ -47,9 +59,11 @@ import dimstyl.pointsofinterest.ui.screens.main.PointOfInterestUiModel
 import dimstyl.pointsofinterest.ui.theme.DialogCameraIconColor
 import dimstyl.pointsofinterest.ui.theme.DialogConfirmButtonTextColor
 import dimstyl.pointsofinterest.ui.theme.DialogContainerColor
+import dimstyl.pointsofinterest.ui.theme.DialogDeletePhotoButtonColor
 import dimstyl.pointsofinterest.ui.theme.DialogDismissButtonTextColor
 import dimstyl.pointsofinterest.ui.theme.DialogFavoriteIconColor
 import dimstyl.pointsofinterest.ui.theme.DialogIconContentColor
+import dimstyl.pointsofinterest.ui.theme.DialogShowHidePhotoButtonColor
 import dimstyl.pointsofinterest.ui.theme.DialogTitleContentColor
 
 @Composable
@@ -61,12 +75,17 @@ fun NewPlaceDialog(
     createTempImageUri: () -> Uri,
     copyTempImageToPermanent: (Uri) -> Uri
 ) {
+    var photoUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    var photoInPreview by rememberSaveable { mutableStateOf(false) }
+    var photoCaptured by rememberSaveable { mutableStateOf(false) }
+
     // Camera launcher
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
+            photoCaptured = success
             if (!success) {
-                showToast("Couldn't take the photo. Please try again.", Toast.LENGTH_SHORT)
+                photoUri = null // Clear temp URI if user dismissed the camera
             }
         }
     )
@@ -80,12 +99,20 @@ fun NewPlaceDialog(
                 isGranted = isGranted
             )
 
-            // If permission is granted, open camera
-            if (isGranted) {
+            // If permission is not granted, return.
+            if (!isGranted) return@rememberLauncherForActivityResult
+
+            // If user already captured a photo show toast message,
+            // otherwise proceed with photo capture.
+            if (photoUri == null) {
                 val uri = createTempImageUri()
-                val pointOfInterest = state.pointOfInterestUiModel.copy(photoUri = uri.toString())
-                viewModel.setNewPointOfInterestUiModel(pointOfInterest)
+                photoUri = uri
                 cameraLauncher.launch(uri)
+            } else {
+                showToast(
+                    "Only one photo allowed. Delete the current one to add a new photo.",
+                    Toast.LENGTH_LONG
+                )
             }
         }
     )
@@ -101,7 +128,6 @@ fun NewPlaceDialog(
     var titleTouched by remember { mutableStateOf(false) }
     var categoryTouched by remember { mutableStateOf(false) }
     var ratingTouched by remember { mutableStateOf(false) }
-
 
     AlertDialog(
         icon = { Icon(painter = painterResource(R.drawable.add_place), contentDescription = null) },
@@ -229,7 +255,7 @@ fun NewPlaceDialog(
                                 val message =
                                     if (!isFavorite) "Added to favorites" else "Removed from favorites"
                                 viewModel.setNewPointOfInterestUiModel(pointOfInterest)
-                                showSnackbar(message, true)
+                                showToast(message, Toast.LENGTH_SHORT)
                             },
                             colors = IconButtonDefaults.iconButtonColors(contentColor = DialogFavoriteIconColor)
                         ) {
@@ -237,6 +263,54 @@ fun NewPlaceDialog(
                                 imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = "Mark as favorite"
                             )
+                        }
+                    }
+                }
+                // Photo preview
+                item(
+                    key = LazyColumnType.PHOTO_PREVIEW,
+                    contentType = LazyColumnType.PHOTO_PREVIEW
+                ) {
+                    // If photoUri is null or photoCaptured == false, return (no captured photo).
+                    if (photoUri == null || !photoCaptured) return@item
+
+                    Spacer(Modifier.height(8.dp))
+
+                    if (photoInPreview) {
+                        AsyncImage(
+                            modifier = Modifier.clip(RoundedCornerShape(12.dp)),
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(photoUri)
+                                .crossfade(true)
+                                .build(),
+                            contentScale = ContentScale.Fit,
+                            contentDescription = null
+                        )
+                    }
+
+                    // View-Hide/Delete photo buttons
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // View-Hide photo button
+                        TextButton(
+                            onClick = { photoInPreview = !photoInPreview },
+                            colors = ButtonDefaults.textButtonColors(contentColor = DialogShowHidePhotoButtonColor)
+                        ) {
+                            val text = if (!photoInPreview) "View Photo" else "Hide Photo"
+                            Text(text = text)
+                        }
+                        // Delete photo button
+                        TextButton(
+                            onClick = {
+                                photoUri = null
+                                photoInPreview = false
+                                photoCaptured = false
+                            },
+                            colors = ButtonDefaults.textButtonColors(contentColor = DialogDeletePhotoButtonColor)
+                        ) {
+                            Text(text = "Delete Photo")
                         }
                     }
                 }
@@ -260,8 +334,11 @@ fun NewPlaceDialog(
                         showToast("Please fill in all required fields", Toast.LENGTH_LONG)
                     } else {
                         // Copy photo from cache to permanent storage
-                        val uri = state.pointOfInterestUiModel.photoUri.toUri()
-                        val newUri = copyTempImageToPermanent(uri).toString()
+                        val uri = state.pointOfInterestUiModel.photoUri?.toUri() ?: Uri.EMPTY
+                        val newUri = when {
+                            uri.equals(Uri.EMPTY) -> ""
+                            else -> copyTempImageToPermanent(uri).toString()
+                        }
 
                         // Check if the copy was successful
                         if (newUri.isBlank()) {
