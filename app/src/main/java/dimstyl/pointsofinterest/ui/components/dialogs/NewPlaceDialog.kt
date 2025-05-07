@@ -46,7 +46,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -72,8 +71,8 @@ fun NewPlaceDialog(
     state: MainState,
     showSnackbar: (String, Boolean) -> Unit,
     showToast: (String, Int) -> Unit,
-    createTempImageUri: () -> Uri,
-    copyTempImageToPermanent: (Uri) -> Uri
+    createTempPhotoUri: () -> Uri,
+    copyTempPhotoToPermanent: (Uri) -> Uri
 ) {
     var photoUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var photoInPreview by rememberSaveable { mutableStateOf(false) }
@@ -85,7 +84,7 @@ fun NewPlaceDialog(
         onResult = { success ->
             photoCaptured = success
             if (!success) {
-                photoUri = null // Clear temp URI if user dismissed the camera
+                photoUri = null // Clear photoUri if user dismissed the camera
             }
         }
     )
@@ -102,10 +101,12 @@ fun NewPlaceDialog(
             // If permission is not granted, return.
             if (!isGranted) return@rememberLauncherForActivityResult
 
-            // If user already captured a photo show toast message,
-            // otherwise proceed with photo capture.
+            /*
+            If user already captured a photo show toast message,
+            otherwise proceed with photo capture.
+            */
             if (photoUri == null) {
-                val uri = createTempImageUri()
+                val uri = createTempPhotoUri()
                 photoUri = uri
                 cameraLauncher.launch(uri)
             } else {
@@ -123,8 +124,10 @@ fun NewPlaceDialog(
     val focusRequesterDescription = remember { FocusRequester() }
     val focusRequesterRating = remember { FocusRequester() }
 
-    // Track whether the user has interacted with each required field.
-    // Used to avoid showing validation errors (e.g., red outline) before user input.
+    /*
+    Track whether the user has interacted with each required field.
+    Used to avoid showing validation errors (e.g., red outline) before user input.
+    */
     var titleTouched by remember { mutableStateOf(false) }
     var categoryTouched by remember { mutableStateOf(false) }
     var ratingTouched by remember { mutableStateOf(false) }
@@ -137,7 +140,6 @@ fun NewPlaceDialog(
                 // Title text field
                 item(key = LazyColumnType.TITLE, contentType = LazyColumnType.TITLE) {
                     val title = state.pointOfInterestUiModel.title
-
                     OutlinedTextField(
                         modifier = Modifier.focusRequester(focusRequesterTitle),
                         label = "Title *",
@@ -156,7 +158,6 @@ fun NewPlaceDialog(
                 // Category text field
                 item(key = LazyColumnType.CATEGORY, contentType = LazyColumnType.CATEGORY) {
                     val category = state.pointOfInterestUiModel.category
-
                     OutlinedTextField(
                         modifier = Modifier.focusRequester(focusRequesterCategory),
                         label = "Category *",
@@ -314,7 +315,6 @@ fun NewPlaceDialog(
                         }
                     }
                 }
-                // TODO: Location
             }
         },
         containerColor = DialogContainerColor,

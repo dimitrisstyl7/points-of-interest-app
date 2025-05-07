@@ -27,16 +27,15 @@ class MainActivity : ComponentActivity() {
             PointsOfInterestTheme {
                 Surface(Modifier.fillMaxSize()) {
                     MainScreen(
-                        openAppSettings = this::openAppSettings,
-                        showToastMessage = { message, duration ->
-                            showToast(message, duration)
-                        },
+                        openAppSettings = ::openAppSettings,
+                        showToast = { message, duration -> showToast(message, duration) },
                         isPermanentlyDeclined = { permission ->
                             shouldShowRequestPermissionRationale(permission).not()
                         },
-                        createTempImageUri = this::createTempImageUri,
-                        copyTempImageToPermanent = this::copyTempImageToPermanent,
-                        exitApp = { finish() })
+                        createTempPhotoUri = ::createTempPhotoUri,
+                        copyTempPhotoToPermanent = ::copyTempPhotoToPermanent,
+                        exitApp = ::finish
+                    )
                 }
             }
         }
@@ -47,14 +46,14 @@ private fun Activity.openAppSettings() {
     Intent(
         Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
         Uri.fromParts("package", packageName, null)
-    ).also(this::startActivity)
+    ).also(::startActivity)
 }
 
 private fun Activity.showToast(message: String, duration: Int) {
     Toast.makeText(this, message, duration).show()
 }
 
-private fun Activity.createTempImageUri(): Uri {
+private fun Activity.createTempPhotoUri(): Uri {
     val filename = "${UUID.randomUUID()}.jpg"
     val imageFile = File(cacheDir, filename)
     return FileProvider.getUriForFile(
@@ -64,7 +63,7 @@ private fun Activity.createTempImageUri(): Uri {
     )
 }
 
-private fun Activity.copyTempImageToPermanent(uri: Uri): Uri {
+private fun Activity.copyTempPhotoToPermanent(uri: Uri): Uri {
     val inputStream = try {
         contentResolver.openInputStream(uri)
             ?: throw RuntimeException("Input stream cannot be null")

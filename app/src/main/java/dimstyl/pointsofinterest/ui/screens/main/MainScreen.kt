@@ -52,11 +52,11 @@ fun MainScreen(
     navController: NavController = rememberNavController(),
     viewModel: MainViewModel = viewModel<MainViewModel>(factory = viewModelFactory { MainViewModel() }), // TODO: if not arguments, just use viewModel()
     openAppSettings: () -> Unit,
-    showToastMessage: (String, Int) -> Unit,
+    showToast: (String, Int) -> Unit,
     isPermanentlyDeclined: (String) -> Boolean,
-    exitApp: () -> Unit,
-    createTempImageUri: () -> Uri,
-    copyTempImageToPermanent: (Uri) -> Uri
+    createTempPhotoUri: () -> Uri,
+    copyTempPhotoToPermanent: (Uri) -> Uri,
+    exitApp: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -142,9 +142,9 @@ fun MainScreen(
             showSnackbar = { message, shortDuration ->
                 onSnackbarShow(message, shortDuration)
             },
-            showToast = showToastMessage,
-            createTempImageUri = createTempImageUri,
-            copyTempImageToPermanent = copyTempImageToPermanent
+            showToast = showToast,
+            createTempPhotoUri = createTempPhotoUri,
+            copyTempPhotoToPermanent = copyTempPhotoToPermanent
         )
     }
 
