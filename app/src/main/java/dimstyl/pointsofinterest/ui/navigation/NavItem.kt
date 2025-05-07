@@ -5,7 +5,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.ui.graphics.vector.ImageVector
 
-class NavItem(
+data class NavItem(
     val icon: ImageVector,
     val route: NavRoute,
     val navLabel: String = route.toString()
@@ -13,5 +13,5 @@ class NavItem(
 
 val navItems = listOf(
     NavItem(icon = Icons.Default.Place, route = NavRoute.PLACES),
-    NavItem(icon = Icons.Default.Favorite, route = NavRoute.FAVOURITES)
+    NavItem(icon = Icons.Default.Favorite, route = NavRoute.FAVORITES)
 )

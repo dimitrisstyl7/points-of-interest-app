@@ -10,19 +10,19 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PointOfInterestDao {
 
-    @Query("SELECT * FROM PointOfInterest")
-    fun getAll(): Flow<List<PointOfInterest>>
+    @Query("SELECT * FROM PointOfInterestEntity")
+    fun getAll(): Flow<List<PointOfInterestEntity>>
 
-    @Query("SELECT * FROM PointOfInterest WHERE id = :id")
-    fun getById(id: Int): Flow<PointOfInterest>
+    @Query("SELECT * FROM PointOfInterestEntity WHERE id = :id")
+    fun getById(id: Int): Flow<PointOfInterestEntity>
 
     @Insert
-    suspend fun insert(pointOfInterest: PointOfInterest)
+    suspend fun insert(pointOfInterestEntity: PointOfInterestEntity)
 
     @Update
-    suspend fun update(pointOfInterest: PointOfInterest)
+    suspend fun update(pointOfInterestEntity: PointOfInterestEntity)
 
     @Delete
-    suspend fun delete(pointOfInterest: PointOfInterest)
+    suspend fun delete(pointOfInterestEntity: PointOfInterestEntity)
 
 }

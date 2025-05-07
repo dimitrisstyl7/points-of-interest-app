@@ -5,13 +5,14 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class PointOfInterest(
-    @PrimaryKey(autoGenerate = true) val id: Int,
+data class PointOfInterestEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int? = null,
     @ColumnInfo val title: String,
     @ColumnInfo val category: String,
-    @ColumnInfo val description: String?,
+    @ColumnInfo val description: String? = null,
     @ColumnInfo val longitude: Double,
     @ColumnInfo val latitude: Double,
     @ColumnInfo val rating: Int,
-    @ColumnInfo val photo: String?,
+    @ColumnInfo val photoUri: String? = null,
+    @ColumnInfo val isFavorite: Boolean,
 )

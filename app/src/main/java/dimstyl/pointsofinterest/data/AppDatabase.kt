@@ -3,9 +3,9 @@ package dimstyl.pointsofinterest.data
 import androidx.room.Database
 import androidx.room.RoomDatabase
 
-@Database(entities = [PointOfInterest::class], version = 1)
+@Database(entities = [PointOfInterestEntity::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
 
-    abstract fun PointOfInterestDao(): PointOfInterestDao
+    abstract fun pointOfInterestDao(): PointOfInterestDao
 
 }

@@ -4,8 +4,8 @@ class PointOfInterestRepository(private val pointOfInterestDao: PointOfInterestD
 
     fun pointsOfInterest() = pointOfInterestDao.getAll()
     fun getPointOfInterest(id: Int) = pointOfInterestDao.getById(id)
-    suspend fun addPointOfInterest(wish: PointOfInterest) = pointOfInterestDao.insert(wish)
-    suspend fun updatePointOfInterest(wish: PointOfInterest) = pointOfInterestDao.update(wish)
-    suspend fun deletePointOfInterest(wish: PointOfInterest) = pointOfInterestDao.delete(wish)
+    suspend fun addPointOfInterest(poi: PointOfInterestEntity) = pointOfInterestDao.insert(poi)
+    suspend fun updatePointOfInterest(poi: PointOfInterestEntity) = pointOfInterestDao.update(poi)
+    suspend fun deletePointOfInterest(poi: PointOfInterestEntity) = pointOfInterestDao.delete(poi)
 
 }

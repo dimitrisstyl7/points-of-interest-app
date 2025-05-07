@@ -4,5 +4,9 @@ import dimstyl.pointsofinterest.ui.navigation.NavItem
 import dimstyl.pointsofinterest.ui.navigation.navItems
 
 data class MainState(
-    val currentNavItem: NavItem = navItems[0] // Places screen is the starting destination
+    val currentNavItem: NavItem = navItems[0], // Places screen is the starting destination
+    val pointOfInterestUiModel: PointOfInterestUiModel = PointOfInterestUiModel(),
+    val showNewPlaceDialog: Boolean = false,
+    val permissions: List<String> = listOf(),
+    val savingPointOfInterest: Boolean = false
 )

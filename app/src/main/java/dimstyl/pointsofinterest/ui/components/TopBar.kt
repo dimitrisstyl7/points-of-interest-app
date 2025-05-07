@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dimstyl.pointsofinterest.ui.screens.main.MainState
-import dimstyl.pointsofinterest.ui.theme.IconColor
+import dimstyl.pointsofinterest.ui.theme.NavBarIconColor
 import dimstyl.pointsofinterest.ui.theme.TopBarColor
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,11 +24,11 @@ fun TopBar(mainState: MainState) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = mainState.currentNavItem.icon,
-                    tint = IconColor,
+                    tint = NavBarIconColor,
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.width(16.dp))
-                Text(text = mainState.currentNavItem.navLabel, color = IconColor)
+                Text(text = mainState.currentNavItem.navLabel, color = NavBarIconColor)
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(

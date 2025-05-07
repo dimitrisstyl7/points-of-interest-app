@@ -1,14 +1,20 @@
 package dimstyl.pointsofinterest.ui.screens.main
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,9 +25,14 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import dimstyl.pointsofinterest.App
 import dimstyl.pointsofinterest.ui.components.BottomBar
 import dimstyl.pointsofinterest.ui.components.FloatingActionButton
 import dimstyl.pointsofinterest.ui.components.TopBar
+import dimstyl.pointsofinterest.ui.components.dialogs.CameraPermissionTextProvider
+import dimstyl.pointsofinterest.ui.components.dialogs.LocationPermissionTextProvider
+import dimstyl.pointsofinterest.ui.components.dialogs.NewPlaceDialog
+import dimstyl.pointsofinterest.ui.components.dialogs.RequestPermissionRationaleDialog
 import dimstyl.pointsofinterest.ui.navigation.AppNavHost
 import dimstyl.pointsofinterest.ui.navigation.NavRoute
 import dimstyl.pointsofinterest.ui.navigation.navItems
@@ -41,19 +52,27 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     navController: NavController = rememberNavController(),
-    viewModel: MainViewModel = viewModel<MainViewModel>(factory = viewModelFactory { MainViewModel() }),
+    viewModel: MainViewModel = viewModel<MainViewModel>(factory = viewModelFactory {
+        MainViewModel(App.appModule.pointOfInterestRepository)
+    }),
+    openAppSettings: () -> Unit,
+    showToast: (String, Int) -> Unit,
+    isPermanentlyDeclined: (String) -> Boolean,
+    createTempPhotoUri: () -> Uri,
+    copyTempPhotoToPermanent: (Uri) -> Uri,
     exitApp: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val mainState by viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val entry by navController.currentBackStackEntryAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val backHandler = @Composable {
         BackHandler {
             val backStackSize = navController.currentBackStack.value.size
 
             when {
-                backStackSize < 3 && mainState.currentNavItem.route == NavRoute.PLACES -> {
+                backStackSize < 3 && state.currentNavItem.route == NavRoute.PLACES -> {
                     /*
                     * If the back stack contains only two entries (the places screen and the start
                     *   destination of the navigation graph), and the current route is the places
@@ -77,19 +96,28 @@ fun MainScreen(
         }
     }
 
+    val onSnackbarShow: (String, Boolean) -> Unit = { message, shortDuration ->
+        scope.launch {
+            val duration =
+                if (shortDuration) SnackbarDuration.Short else SnackbarDuration.Long
+            snackbarHostState.showSnackbar(message = message, duration = duration)
+        }
+    }
+
     Scaffold(
-        topBar = { TopBar(mainState) },
+        topBar = { TopBar(state) },
         bottomBar = {
             BottomBar(
-                mainState = mainState,
+                mainState = state,
                 onNavigate = { navItem ->
-                    if (navItem.route != mainState.currentNavItem.route) {
+                    if (navItem.route != state.currentNavItem.route) {
                         navController.navigate(navItem.route.getRoute())
                         viewModel.setCurrentNavItem(navItem)
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -104,8 +132,38 @@ fun MainScreen(
             FloatingActionButton(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(bottom = 20.dp, end = 20.dp)
-            ) { }
+                    .padding(bottom = 20.dp, end = 20.dp),
+                onClick = { viewModel.showNewPlaceDialog(true) }
+            )
         }
+    }
+
+    // NewPlaceDialog
+    if (state.showNewPlaceDialog) {
+        NewPlaceDialog(
+            viewModel = viewModel,
+            state = state,
+            showSnackbar = { message, shortDuration ->
+                onSnackbarShow(message, shortDuration)
+            },
+            showToast = showToast,
+            createTempPhotoUri = createTempPhotoUri,
+            copyTempPhotoToPermanent = copyTempPhotoToPermanent
+        )
+    }
+
+    // Show RequestPermissionRationaleDialog if necessary
+    state.permissions.reversed().forEach { permission ->
+        RequestPermissionRationaleDialog(
+            permissionTextProvider = when (permission) {
+                Manifest.permission.CAMERA -> CameraPermissionTextProvider()
+                Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION -> LocationPermissionTextProvider()
+
+                else -> return@forEach
+            },
+            isPermanentlyDeclined = isPermanentlyDeclined(permission),
+            onDismiss = { viewModel.dismissDialogPermission() },
+            openAppSettings = openAppSettings
+        )
     }
 }
