@@ -43,3 +43,5 @@ val DialogFavoriteIconColor = Color(0xFFEF5350)
 
 val DialogConfirmButtonTextColor = TopBarColor
 val DialogDismissButtonTextColor = Color(0xFF555555)
+val DialogDeletePhotoButtonColor = Color(0xFFEF5350)
+val DialogShowHidePhotoButtonColor = Color(0xFF2196F3)
