@@ -37,7 +37,7 @@ Here's a preview of the Points of Interest Application in action:
 <img src="https://github.com/user-attachments/assets/1744a691-8730-4a86-b1c4-6eee3089bd86" width="300"/>
 
 ### 5. Delete a POI
-<img src="https://github.com/user-attachments/assets/ba981f77-973c-489c-bf9f-bbc01405274a" width="300"/>
+<img src="https://github.com/user-attachments/assets/8acd20dd-9829-4682-9b6c-6547635cda6c" width="300"/>
 
 ## Acknowledgments
 This project was developed as part of the "Software Development for Mobile Devices" MSc course at the University of Piraeus. Contributions and feedback are always welcome!
