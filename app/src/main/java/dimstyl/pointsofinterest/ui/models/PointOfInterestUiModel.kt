@@ -1,8 +1,9 @@
-package dimstyl.pointsofinterest.ui.screens.main
+package dimstyl.pointsofinterest.ui.models
 
 import dimstyl.pointsofinterest.data.PointOfInterestEntity
 
 data class PointOfInterestUiModel(
+    val id: Int? = null,
     val title: String = "",
     val category: String = "",
     val description: String = "",
@@ -16,6 +17,7 @@ data class PointOfInterestUiModel(
 ) {
 
     fun toEntity() = PointOfInterestEntity(
+        id = id,
         title = title,
         category = category,
         description = description,
@@ -25,5 +27,14 @@ data class PointOfInterestUiModel(
         photoUri = photoUri,
         isFavorite = isFavorite
     )
+
+    fun contentEquals(pointOfInterestUiModel: PointOfInterestUiModel): Boolean {
+        return title == pointOfInterestUiModel.title &&
+                category == pointOfInterestUiModel.category &&
+                description == pointOfInterestUiModel.description &&
+                rating == pointOfInterestUiModel.rating &&
+                photoUri == pointOfInterestUiModel.photoUri &&
+                isFavorite == pointOfInterestUiModel.isFavorite
+    }
 
 }

@@ -1,4 +1,4 @@
-package dimstyl.pointsofinterest.ui.screens.favorites
+package dimstyl.pointsofinterest.ui.screens.discoveries
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,9 +16,9 @@ import dimstyl.pointsofinterest.ui.screens.main.MainViewModel
 import dimstyl.pointsofinterest.ui.utils.viewModelFactory
 
 @Composable
-fun FavoritesScreen(
-    viewModel: FavoritesViewModel = viewModel<FavoritesViewModel>(factory = viewModelFactory {
-        FavoritesViewModel(App.appModule.pointOfInterestRepository)
+fun DiscoveriesScreen(
+    viewModel: DiscoveriesViewModel = viewModel<DiscoveriesViewModel>(factory = viewModelFactory {
+        DiscoveriesViewModel(App.appModule.pointOfInterestRepository)
     }),
     mainViewModel: MainViewModel,
 ) {

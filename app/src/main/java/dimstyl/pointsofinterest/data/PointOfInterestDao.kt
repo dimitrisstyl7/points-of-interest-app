@@ -13,8 +13,8 @@ interface PointOfInterestDao {
     @Query("SELECT * FROM PointOfInterestEntity")
     fun getAll(): Flow<List<PointOfInterestEntity>>
 
-    @Query("SELECT * FROM PointOfInterestEntity WHERE id = :id")
-    fun getById(id: Int): Flow<PointOfInterestEntity>
+    @Query("SELECT * FROM PointOfInterestEntity WHERE isFavorite = 1")
+    fun getFavorites(): Flow<List<PointOfInterestEntity>>
 
     @Insert
     suspend fun insert(pointOfInterestEntity: PointOfInterestEntity)

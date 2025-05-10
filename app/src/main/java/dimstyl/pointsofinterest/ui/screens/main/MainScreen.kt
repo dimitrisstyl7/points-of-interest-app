@@ -31,8 +31,9 @@ import dimstyl.pointsofinterest.ui.components.FloatingActionButton
 import dimstyl.pointsofinterest.ui.components.TopBar
 import dimstyl.pointsofinterest.ui.components.dialogs.CameraPermissionTextProvider
 import dimstyl.pointsofinterest.ui.components.dialogs.LocationPermissionTextProvider
-import dimstyl.pointsofinterest.ui.components.dialogs.NewPlaceDialog
+import dimstyl.pointsofinterest.ui.components.dialogs.NewDiscoveryDialog
 import dimstyl.pointsofinterest.ui.components.dialogs.RequestPermissionRationaleDialog
+import dimstyl.pointsofinterest.ui.components.dialogs.ViewDiscoveryDialog
 import dimstyl.pointsofinterest.ui.navigation.AppNavHost
 import dimstyl.pointsofinterest.ui.navigation.NavRoute
 import dimstyl.pointsofinterest.ui.navigation.navItems
@@ -42,13 +43,13 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("RestrictedApi")
 /*
-* Suppressed to access the current backstack size from NavController.
-* This is necessary to handle system back button behavior properly.
-*
-* Note: Accessing the backstack size is a restricted API, so use this
-* carefully and ensure future updates to the navigation library do not
-* expose a safer alternative for this logic.
-* */
+Suppressed to access the current backstack size from NavController.
+This is necessary to handle system back button behavior properly.
+
+Note: Accessing the backstack size is a restricted API, so use this
+carefully and ensure future updates to the navigation library do not
+expose a safer alternative for this logic.
+*/
 @Composable
 fun MainScreen(
     navController: NavController = rememberNavController(),
@@ -72,12 +73,12 @@ fun MainScreen(
             val backStackSize = navController.currentBackStack.value.size
 
             when {
-                backStackSize < 3 && state.currentNavItem.route == NavRoute.PLACES -> {
+                backStackSize < 3 && state.currentNavItem.route == NavRoute.DISCOVERIES -> {
                     /*
-                    * If the back stack contains only two entries (the places screen and the start
-                    *   destination of the navigation graph), and the current route is the places
-                    *   screen (PLACES) ➡️ then exit the app
-                    * */
+                    If the back stack contains only two entries (the discoveries screen and the start
+                    destination of the navigation graph), and the current route is the discoveries
+                    screen ➡️ then exit the app
+                    */
                     exitApp()
                 }
 
@@ -127,20 +128,35 @@ fun MainScreen(
         ) {
             AppNavHost(
                 navController = navController,
-                backHandler = backHandler
+                backHandler = backHandler,
+                viewModel = viewModel
             )
             FloatingActionButton(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(bottom = 20.dp, end = 20.dp),
-                onClick = { viewModel.showNewPlaceDialog(true) }
+                onClick = { viewModel.showNewDiscoveryDialog(true) }
             )
         }
     }
 
-    // NewPlaceDialog
-    if (state.showNewPlaceDialog) {
-        NewPlaceDialog(
+    // NewDiscoveryDialog
+    if (state.showNewDiscoveryDialog) {
+        NewDiscoveryDialog(
+            viewModel = viewModel,
+            state = state,
+            showSnackbar = { message, shortDuration ->
+                onSnackbarShow(message, shortDuration)
+            },
+            showToast = showToast,
+            createTempPhotoUri = createTempPhotoUri,
+            copyTempPhotoToPermanent = copyTempPhotoToPermanent
+        )
+    }
+
+    // ViewDiscoveryDialog
+    if (state.showViewDiscoveryDialog) {
+        ViewDiscoveryDialog(
             viewModel = viewModel,
             state = state,
             showSnackbar = { message, shortDuration ->

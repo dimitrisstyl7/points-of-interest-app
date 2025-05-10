@@ -4,17 +4,17 @@ import kotlinx.serialization.Serializable
 
 enum class NavRoute {
 
-    PLACES,
+    DISCOVERIES,
     FAVORITES;
 
     fun getRoute(): Any = when (this) {
-        PLACES -> Places
+        DISCOVERIES -> Discoveries
         FAVORITES -> Favorites
     }
 
     override fun toString(): String =
         when (this) {
-            PLACES -> "Your Places"
+            DISCOVERIES -> "Your Discoveries"
             FAVORITES -> "Favorites"
         }
 
@@ -24,4 +24,4 @@ enum class NavRoute {
 object Favorites
 
 @Serializable
-object Places
+object Discoveries

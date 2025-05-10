@@ -13,7 +13,9 @@ import com.google.android.gms.location.Priority
 import dimstyl.pointsofinterest.App
 import dimstyl.pointsofinterest.data.PointOfInterestEntity
 import dimstyl.pointsofinterest.data.PointOfInterestRepository
+import dimstyl.pointsofinterest.ui.models.PointOfInterestUiModel
 import dimstyl.pointsofinterest.ui.navigation.NavItem
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -30,12 +32,20 @@ class MainViewModel(
         _state.value = _state.value.copy(currentNavItem = navItem)
     }
 
-    fun setNewPointOfInterestUiModel(pointOfInterestUiModel: PointOfInterestUiModel) {
+    fun setPointOfInterestUiModel(pointOfInterestUiModel: PointOfInterestUiModel) {
         _state.value = _state.value.copy(pointOfInterestUiModel = pointOfInterestUiModel)
     }
 
-    fun showNewPlaceDialog(show: Boolean) {
-        _state.value = _state.value.copy(showNewPlaceDialog = show)
+    fun setDraftPointOfInterestUiModel(pointOfInterestUiModel: PointOfInterestUiModel) {
+        _state.value = _state.value.copy(draftPointOfInterestUiModel = pointOfInterestUiModel)
+    }
+
+    fun showNewDiscoveryDialog(show: Boolean) {
+        _state.value = _state.value.copy(showNewDiscoveryDialog = show)
+    }
+
+    fun showViewDiscoveryDialog(show: Boolean) {
+        _state.value = _state.value.copy(showViewDiscoveryDialog = show)
     }
 
     fun dismissDialogPermission() {
@@ -54,8 +64,8 @@ class MainViewModel(
         }
     }
 
-    fun setSavingPointOfInterest(flag: Boolean) {
-        _state.value = _state.value.copy(savingPointOfInterest = flag)
+    fun setProcessingPointOfInterest(flag: Boolean) {
+        _state.value = _state.value.copy(processingPointOfInterest = flag)
     }
 
     @SuppressLint("MissingPermission") // We know that location permission is already granted
@@ -63,23 +73,23 @@ class MainViewModel(
         context: Context,
         photoUri: Uri?,
         copyTempPhotoToPermanent: (Uri) -> Uri,
-        requestPermission: () -> Unit,
+        requestLocationPermission: () -> Unit,
         showToast: (String, Int) -> Unit,
         showSnackbar: (String, Boolean) -> Unit
     ) {
-        setSavingPointOfInterest(true)
+        setProcessingPointOfInterest(true)
 
         // Validate PointOfInterestUiModel and if has any errors, return.
         if (validatePointOfInterestUiModel()) {
             showToast("Please fill in all required fields", Toast.LENGTH_LONG)
-            setSavingPointOfInterest(false)
+            setProcessingPointOfInterest(false)
             return
         }
 
         // If location permission is not granted, request the permission and return.
         if (isLocationPermissionGranted(context).not()) {
-            requestPermission()
-            setSavingPointOfInterest(false)
+            requestLocationPermission()
+            setProcessingPointOfInterest(false)
             return
         }
 
@@ -95,7 +105,7 @@ class MainViewModel(
                             Toast.LENGTH_LONG
                         )
                     }
-                    setSavingPointOfInterest(false)
+                    setProcessingPointOfInterest(false)
                     return@addOnSuccessListener
                 }
 
@@ -120,7 +130,7 @@ class MainViewModel(
                             Toast.LENGTH_SHORT
                         )
                     }
-                    setSavingPointOfInterest(false)
+                    setProcessingPointOfInterest(false)
                     return@addOnSuccessListener
                 }
 
@@ -133,22 +143,124 @@ class MainViewModel(
                     ).toEntity()
 
                 savePointOfInterest(pointOfInterest = pointOfInterest, onSuccess = {
+                    setProcessingPointOfInterest(false)
+                    showNewDiscoveryDialog(false)
+                    setPointOfInterestUiModel(PointOfInterestUiModel())
                     runOnMainThread(context) {
                         showSnackbar(
-                            "\"${pointOfInterest.title}\" has been added to your places",
+                            "\"${pointOfInterest.title}\" has been added to your discoveries",
                             true
                         )
                     }
-                    setSavingPointOfInterest(false)
-                    showNewPlaceDialog(false)
-                    setNewPointOfInterestUiModel(PointOfInterestUiModel())
                 })
             }
     }
 
+    fun updatePointOfInterest(
+        context: Context,
+        photoUri: Uri?,
+        copyTempPhotoToPermanent: (Uri) -> Uri,
+        showToast: (String, Int) -> Unit,
+        showSnackbar: (String, Boolean) -> Unit
+    ) {
+        setProcessingPointOfInterest(true)
+
+        // Validate PointOfInterestUiModel and if has any errors, return.
+        if (validatePointOfInterestUiModel()) {
+            showToast("Please fill in all required fields", Toast.LENGTH_LONG)
+            setProcessingPointOfInterest(false)
+            return
+        }
+
+        val pointOfInterestUiModel = _state.value.pointOfInterestUiModel
+        val draftPointOfInterestUiModel = _state.value.draftPointOfInterestUiModel
+
+        // If pointOfInterest is equal with draftPointOfInterest, show success message and return.
+        if (pointOfInterestUiModel.contentEquals(draftPointOfInterestUiModel)) {
+            runOnMainThread(context) {
+                showSnackbar(
+                    "\"${pointOfInterestUiModel.title}\" has been updated successfully",
+                    true
+                )
+            }
+            setProcessingPointOfInterest(false)
+            showViewDiscoveryDialog(false)
+            setPointOfInterestUiModel(PointOfInterestUiModel())
+            return
+        }
+
+        /*
+        If no photo is captured, uri is null.
+        Otherwise, it contains the actual uri of the saved photo,
+        or Uri.EMPTY if something went wrong.
+        */
+        val uri = photoUri?.let {
+            // Copy photo from cache to permanent storage
+            copyTempPhotoToPermanent(it)
+        }
+
+        /*
+        If uri is not null and uri == Uri.EMPTY, return.
+        It means that something went wrong while saving the photo.
+        */
+        if (uri != null && uri == Uri.EMPTY) {
+            runOnMainThread(context) {
+                showToast(
+                    "Failed to save your photo. Please try again.",
+                    Toast.LENGTH_SHORT
+                )
+            }
+            setProcessingPointOfInterest(false)
+            return
+        }
+
+        // Update point of interest
+        val pointOfInterest =
+            _state.value.draftPointOfInterestUiModel.copy(photoUri = uri?.toString()).toEntity()
+
+        updatePointOfInterest(pointOfInterest = pointOfInterest, onSuccess = {
+            setPointOfInterestUiModel(PointOfInterestUiModel())
+            setDraftPointOfInterestUiModel(PointOfInterestUiModel())
+            setProcessingPointOfInterest(false)
+            showViewDiscoveryDialog(false)
+            runOnMainThread(context) {
+                showSnackbar(
+                    "\"${pointOfInterestUiModel.title}\" has been updated successfully",
+                    true
+                )
+            }
+        })
+    }
+
+    fun deletePointOfInterest(context: Context, showSnackbar: (String, Boolean) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val pointOfInterest = state.value.pointOfInterestUiModel
+            pointOfInterestRepository.delete(pointOfInterest.toEntity())
+            setPointOfInterestUiModel(PointOfInterestUiModel())
+            setDraftPointOfInterestUiModel(PointOfInterestUiModel())
+            showViewDiscoveryDialog(false)
+            runOnMainThread(context) {
+                showSnackbar(
+                    "Discovery “${pointOfInterest.title}” was deleted successfully",
+                    true
+                )
+            }
+        }
+    }
+
     private fun savePointOfInterest(pointOfInterest: PointOfInterestEntity, onSuccess: () -> Unit) {
-        viewModelScope.launch {
-            pointOfInterestRepository.addPointOfInterest(pointOfInterest)
+        viewModelScope.launch(Dispatchers.IO) {
+            pointOfInterestRepository.save(pointOfInterest)
+            onSuccess()
+        }
+    }
+
+    private fun updatePointOfInterest(
+        pointOfInterest: PointOfInterestEntity,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            pointOfInterestRepository.update(pointOfInterest)
             onSuccess()
         }
     }

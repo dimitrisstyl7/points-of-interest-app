@@ -9,12 +9,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import dimstyl.pointsofinterest.ui.theme.DialogTextFieldFocusedBorderColor
-import dimstyl.pointsofinterest.ui.theme.DialogTextFieldFocusedLabelColor
-import dimstyl.pointsofinterest.ui.theme.DialogTextFieldFocusedTextColor
-import dimstyl.pointsofinterest.ui.theme.DialogTextFieldUnfocusedBorderColor
-import dimstyl.pointsofinterest.ui.theme.DialogTextFieldUnfocusedLabelColor
-import dimstyl.pointsofinterest.ui.theme.DialogTextFieldUnfocusedTextColor
+import dimstyl.pointsofinterest.ui.theme.OutlinedTextFieldCursorColor
+import dimstyl.pointsofinterest.ui.theme.OutlinedTextFieldErrorBorderColor
+import dimstyl.pointsofinterest.ui.theme.OutlinedTextFieldErrorCursorColor
+import dimstyl.pointsofinterest.ui.theme.OutlinedTextFieldErrorLabelColor
+import dimstyl.pointsofinterest.ui.theme.OutlinedTextFieldErrorTextColor
+import dimstyl.pointsofinterest.ui.theme.OutlinedTextFieldFocusedBorderColor
+import dimstyl.pointsofinterest.ui.theme.OutlinedTextFieldFocusedLabelColor
+import dimstyl.pointsofinterest.ui.theme.OutlinedTextFieldFocusedTextColor
+import dimstyl.pointsofinterest.ui.theme.OutlinedTextFieldUnfocusedBorderColor
+import dimstyl.pointsofinterest.ui.theme.OutlinedTextFieldUnfocusedLabelColor
+import dimstyl.pointsofinterest.ui.theme.OutlinedTextFieldUnfocusedTextColor
 
 @Composable
 fun OutlinedTextField(
@@ -39,12 +44,18 @@ fun OutlinedTextField(
         singleLine = singleLine,
         isError = isError,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = DialogTextFieldFocusedTextColor,
-            unfocusedTextColor = DialogTextFieldUnfocusedTextColor,
-            focusedBorderColor = DialogTextFieldFocusedBorderColor,
-            unfocusedBorderColor = DialogTextFieldUnfocusedBorderColor,
-            focusedLabelColor = DialogTextFieldFocusedLabelColor,
-            unfocusedLabelColor = DialogTextFieldUnfocusedLabelColor
+            focusedTextColor = OutlinedTextFieldFocusedTextColor,
+            unfocusedTextColor = OutlinedTextFieldUnfocusedTextColor,
+            focusedBorderColor = OutlinedTextFieldFocusedBorderColor,
+            unfocusedBorderColor = OutlinedTextFieldUnfocusedBorderColor,
+            focusedLabelColor = OutlinedTextFieldFocusedLabelColor,
+            unfocusedLabelColor = OutlinedTextFieldUnfocusedLabelColor,
+            cursorColor = OutlinedTextFieldCursorColor,
+            errorCursorColor = OutlinedTextFieldErrorCursorColor,
+            errorTextColor = OutlinedTextFieldErrorTextColor,
+            errorLabelColor = OutlinedTextFieldErrorLabelColor,
+            errorBorderColor = OutlinedTextFieldErrorBorderColor
+
         ),
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions

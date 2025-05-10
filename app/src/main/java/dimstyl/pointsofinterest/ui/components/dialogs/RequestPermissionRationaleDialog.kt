@@ -50,7 +50,7 @@ class CameraPermissionTextProvider : PermissionTextProvider {
             "Camera permission was permanently denied. " +
                     "Please enable it in app settings to take a photo of your discovery."
         } else {
-            "We need access to your camera so you can take a photo of your place discovery."
+            "We need access to your camera so you can take a photo of your discovery."
         }
     }
 }

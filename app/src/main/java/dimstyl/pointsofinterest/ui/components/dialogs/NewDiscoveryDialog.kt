@@ -52,10 +52,10 @@ import coil3.request.crossfade
 import dimstyl.pointsofinterest.R
 import dimstyl.pointsofinterest.ui.components.ButtonCircularProgressIndicator
 import dimstyl.pointsofinterest.ui.components.OutlinedTextField
+import dimstyl.pointsofinterest.ui.models.PointOfInterestUiModel
 import dimstyl.pointsofinterest.ui.screens.main.LazyColumnType
 import dimstyl.pointsofinterest.ui.screens.main.MainState
 import dimstyl.pointsofinterest.ui.screens.main.MainViewModel
-import dimstyl.pointsofinterest.ui.screens.main.PointOfInterestUiModel
 import dimstyl.pointsofinterest.ui.theme.DialogCameraIconColor
 import dimstyl.pointsofinterest.ui.theme.DialogConfirmButtonTextColor
 import dimstyl.pointsofinterest.ui.theme.DialogContainerColor
@@ -67,7 +67,7 @@ import dimstyl.pointsofinterest.ui.theme.DialogShowHidePhotoButtonColor
 import dimstyl.pointsofinterest.ui.theme.DialogTitleContentColor
 
 @Composable
-fun NewPlaceDialog(
+fun NewDiscoveryDialog(
     viewModel: MainViewModel,
     state: MainState,
     showSnackbar: (String, Boolean) -> Unit,
@@ -76,6 +76,7 @@ fun NewPlaceDialog(
     copyTempPhotoToPermanent: (Uri) -> Uri
 ) {
     val context = LocalContext.current
+    val pointOfInterestUiModel = state.pointOfInterestUiModel
 
     var photoUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var photoInPreview by rememberSaveable { mutableStateOf(false) }
@@ -87,7 +88,8 @@ fun NewPlaceDialog(
         onResult = { success ->
             photoCaptured = success
             if (!success) {
-                photoUri = null // Clear photoUri if user dismissed the camera
+                // Clear photoUri if the camera was dismissed or failed.
+                photoUri = null
             }
         }
     )
@@ -149,21 +151,26 @@ fun NewPlaceDialog(
     var ratingTouched by remember { mutableStateOf(false) }
 
     AlertDialog(
-        icon = { Icon(painter = painterResource(R.drawable.add_place), contentDescription = null) },
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.add_discovery),
+                contentDescription = null
+            )
+        },
         title = { Text(text = "Your New Discovery") },
         text = {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 // Title text field
                 item(key = LazyColumnType.TITLE, contentType = LazyColumnType.TITLE) {
-                    val title = state.pointOfInterestUiModel.title
+                    val title = pointOfInterestUiModel.title
                     OutlinedTextField(
                         modifier = Modifier.focusRequester(focusRequesterTitle),
                         label = "Title *",
                         value = title,
                         onValueChange = {
                             titleTouched = true
-                            val pointOfInterest = state.pointOfInterestUiModel.copy(title = it)
-                            viewModel.setNewPointOfInterestUiModel(pointOfInterest)
+                            val pointOfInterest = pointOfInterestUiModel.copy(title = it)
+                            viewModel.setPointOfInterestUiModel(pointOfInterest)
                         },
                         isError = titleTouched && title.isBlank(),
                         keyboardActions = KeyboardActions(onNext = {
@@ -173,15 +180,15 @@ fun NewPlaceDialog(
                 }
                 // Category text field
                 item(key = LazyColumnType.CATEGORY, contentType = LazyColumnType.CATEGORY) {
-                    val category = state.pointOfInterestUiModel.category
+                    val category = pointOfInterestUiModel.category
                     OutlinedTextField(
                         modifier = Modifier.focusRequester(focusRequesterCategory),
                         label = "Category *",
                         value = category,
                         onValueChange = {
                             categoryTouched = true
-                            val pointOfInterest = state.pointOfInterestUiModel.copy(category = it)
-                            viewModel.setNewPointOfInterestUiModel(pointOfInterest)
+                            val pointOfInterest = pointOfInterestUiModel.copy(category = it)
+                            viewModel.setPointOfInterestUiModel(pointOfInterest)
                         },
                         isError = categoryTouched && category.isBlank(),
                         keyboardActions = KeyboardActions(onNext = {
@@ -191,9 +198,9 @@ fun NewPlaceDialog(
                 }
                 // Rating text field
                 item(key = LazyColumnType.RATING, contentType = LazyColumnType.RATING) {
-                    val min = state.pointOfInterestUiModel.minRating
-                    val max = state.pointOfInterestUiModel.maxRating
-                    val rating = state.pointOfInterestUiModel.rating
+                    val min = pointOfInterestUiModel.minRating
+                    val max = pointOfInterestUiModel.maxRating
+                    val rating = pointOfInterestUiModel.rating
                     val hasError: (String) -> Boolean = { it.isBlank() || it.toInt() !in min..max }
 
                     OutlinedTextField(
@@ -203,12 +210,12 @@ fun NewPlaceDialog(
                         onValueChange = {
                             ratingTouched = true
                             if (hasError(it)) {
-                                viewModel.setNewPointOfInterestUiModel(
-                                    state.pointOfInterestUiModel.copy(rating = "")
+                                viewModel.setPointOfInterestUiModel(
+                                    pointOfInterestUiModel.copy(rating = "")
                                 )
                             } else {
-                                val pointOfInterest = state.pointOfInterestUiModel.copy(rating = it)
-                                viewModel.setNewPointOfInterestUiModel(pointOfInterest)
+                                val pointOfInterest = pointOfInterestUiModel.copy(rating = it)
+                                viewModel.setPointOfInterestUiModel(pointOfInterest)
                             }
                         },
                         isError = ratingTouched && hasError(rating),
@@ -226,11 +233,11 @@ fun NewPlaceDialog(
                     OutlinedTextField(
                         modifier = Modifier.focusRequester(focusRequesterDescription),
                         label = "Description",
-                        value = state.pointOfInterestUiModel.description,
+                        value = pointOfInterestUiModel.description,
                         onValueChange = {
                             val pointOfInterest =
-                                state.pointOfInterestUiModel.copy(description = it)
-                            viewModel.setNewPointOfInterestUiModel(pointOfInterest)
+                                pointOfInterestUiModel.copy(description = it)
+                            viewModel.setPointOfInterestUiModel(pointOfInterest)
                         },
                         singleLine = false,
                         keyboardOptions = KeyboardOptions(
@@ -240,7 +247,7 @@ fun NewPlaceDialog(
                         keyboardActions = KeyboardActions()
                     )
                 }
-                // Photo & Favorite buttons
+                // Photo capture and favorite buttons
                 item(
                     key = LazyColumnType.PHOTO_FAVORITES,
                     contentType = LazyColumnType.PHOTO_FAVORITES
@@ -251,7 +258,7 @@ fun NewPlaceDialog(
                             .padding(top = 16.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        // Photo button
+                        // Photo capture button
                         IconButton(
                             onClick = {
                                 cameraPermissionResultLauncher.launch(Manifest.permission.CAMERA)
@@ -259,19 +266,19 @@ fun NewPlaceDialog(
                             colors = IconButtonDefaults.iconButtonColors(contentColor = DialogCameraIconColor)
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.add_a_photo),
+                                painter = painterResource(R.drawable.capture_a_photo),
                                 contentDescription = "Add a photo"
                             )
                         }
                         // Favorite button
-                        val isFavorite = state.pointOfInterestUiModel.isFavorite
+                        val isFavorite = pointOfInterestUiModel.isFavorite
                         IconButton(
                             onClick = {
                                 val pointOfInterest =
-                                    state.pointOfInterestUiModel.copy(isFavorite = !isFavorite)
+                                    pointOfInterestUiModel.copy(isFavorite = !isFavorite)
                                 val message =
                                     if (!isFavorite) "Added to favorites" else "Removed from favorites"
-                                viewModel.setNewPointOfInterestUiModel(pointOfInterest)
+                                viewModel.setPointOfInterestUiModel(pointOfInterest)
                                 showToast(message, Toast.LENGTH_SHORT)
                             },
                             colors = IconButtonDefaults.iconButtonColors(contentColor = DialogFavoriteIconColor)
@@ -305,7 +312,7 @@ fun NewPlaceDialog(
                         )
                     }
 
-                    // View-Hide/Delete photo buttons
+                    // View-Hide and Delete photo buttons
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -338,11 +345,11 @@ fun NewPlaceDialog(
         textContentColor = Color.Unspecified,
         iconContentColor = DialogIconContentColor,
         onDismissRequest = {
-            viewModel.setNewPointOfInterestUiModel(PointOfInterestUiModel())
-            viewModel.showNewPlaceDialog(false)
+            viewModel.setPointOfInterestUiModel(PointOfInterestUiModel())
+            viewModel.showNewDiscoveryDialog(false)
         },
         confirmButton = {
-            if (state.savingPointOfInterest) {
+            if (state.processingPointOfInterest) {
                 ButtonCircularProgressIndicator()
             } else {
                 TextButton(
@@ -351,7 +358,7 @@ fun NewPlaceDialog(
                             context = context,
                             photoUri = photoUri,
                             copyTempPhotoToPermanent = copyTempPhotoToPermanent,
-                            requestPermission = {
+                            requestLocationPermission = {
                                 multipleLocationPermissionLauncher.launch(
                                     arrayOf(
                                         Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -372,8 +379,8 @@ fun NewPlaceDialog(
         dismissButton = {
             TextButton(
                 onClick = {
-                    viewModel.setNewPointOfInterestUiModel(PointOfInterestUiModel())
-                    viewModel.showNewPlaceDialog(false)
+                    viewModel.setPointOfInterestUiModel(PointOfInterestUiModel())
+                    viewModel.showNewDiscoveryDialog(false)
                 },
                 colors = ButtonDefaults.textButtonColors(contentColor = DialogDismissButtonTextColor)
             ) { Text(text = "Cancel") }

@@ -17,8 +17,8 @@ fun FloatingActionButton(modifier: Modifier, onClick: () -> Unit) {
         contentColor = FloatingActionButtonColor
     ) {
         Icon(
-            painter = painterResource(R.drawable.add_place),
-            contentDescription = "Add a new place"
+            painter = painterResource(R.drawable.add_discovery),
+            contentDescription = "Add a new discovery"
         )
     }
 }

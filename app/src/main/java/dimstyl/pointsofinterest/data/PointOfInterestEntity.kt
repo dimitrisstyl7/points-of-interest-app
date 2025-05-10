@@ -3,6 +3,7 @@ package dimstyl.pointsofinterest.data
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import dimstyl.pointsofinterest.ui.models.PointOfInterestUiModel
 
 @Entity
 data class PointOfInterestEntity(
@@ -15,4 +16,18 @@ data class PointOfInterestEntity(
     @ColumnInfo val rating: Int,
     @ColumnInfo val photoUri: String? = null,
     @ColumnInfo val isFavorite: Boolean,
-)
+) {
+
+    fun toUiModel() = PointOfInterestUiModel(
+        id = id,
+        title = title,
+        category = category,
+        description = description ?: "",
+        longitude = longitude,
+        latitude = latitude,
+        rating = rating.toString(),
+        photoUri = photoUri,
+        isFavorite = isFavorite
+    )
+
+}

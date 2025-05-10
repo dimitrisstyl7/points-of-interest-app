@@ -12,6 +12,6 @@ data class NavItem(
 )
 
 val navItems = listOf(
-    NavItem(icon = Icons.Default.Place, route = NavRoute.PLACES),
+    NavItem(icon = Icons.Default.Place, route = NavRoute.DISCOVERIES),
     NavItem(icon = Icons.Default.Favorite, route = NavRoute.FAVORITES)
 )
